@@ -1,0 +1,259 @@
+\documentclass[fleqn]{scrartcl}
+
+%% Handy math stuff
+\usepackage{amsmath}
+\usepackage{amsthm}
+\usepackage{amsfonts}
+
+%% Control margins in itemize
+\usepackage{enumitem}
+
+%% Commutative diagram tikz package
+\usepackage{tikz-cd}
+
+%% Category environment
+\newenvironment{category}{\begin{itemize}[leftmargin=.9in]}{\end{itemize}}
+\newcommand{\catobj}[1]{\item[\textbf{Object}] #1}
+\newcommand{\catarr}[1]{\item[\textbf{Arrows}] #1}
+\newcommand{\catcomp}[1]{\item[\textbf{Comp.}] #1}
+\newcommand{\catid}[1]{\item[\textbf{Ident.}] #1}
+
+%% Commonly used math symbols
+% An abstract category
+\newcommand{\cat}[1]{\mathcal{#1}}
+% A concrete category
+\newcommand{\ccat}[1]{\mathbf{#1}}
+% Domain of an arrow
+\newcommand{\dom}{\mathrm{dom}}
+% Codomain of an arrow
+\newcommand{\cod}{\mathrm{cod}}
+
+% Therom styles
+\theoremstyle{definition} \newtheorem{definition}{Definition}
+\theoremstyle{remark} \newtheorem{example}{Example}
+
+\begin{document}
+
+\title{Introduction to Category Theory}
+\date{}
+\author{LAMP Team}
+
+\maketitle
+
+\section{Motivation / Goals}
+
+\begin{itemize}
+\item Not to teach Haskell / Scalaz
+\item Not to develop deep theorems
+\item Get some basic notions (compare Set theory in theoretical
+  computer science)
+\item Hopefully useful for reading papers
+\end{itemize}
+
+Category theory is about relation between different objects. Rather
+than having elements, we think of functions or behavior. You could
+call it the mathematical theory of abstraction. Category theory
+unifies existing concepts and hopefully makes it applicable to other
+things.
+
+\section{Categories}
+
+\begin{definition}[Category]
+  A category $\cat{C}$ is
+  \begin{category}
+    \catobj{a collection $\cat{C}_0$ of objects}
+    \catarr{a collection $\cat{C}_1$ of arrows (or morphisms,
+      homomorphisms)}
+    \catcomp{a composition operation $\circ$}
+    \catid{an identity arrow $id_A: A \to A \in \cat{C}_1$ for every $A
+      \in \cat{C}_0$}
+  \end{category}
+  Such that for each arrow $f \in \cat{C}_1$ there are objects
+  $\dom(f),\ \cod(f) \in \cat{C}_0$. In other words, there are maps
+  (total functions) $\dom,\ \cod : \cat{C}_1 \to  \cat{C}_0$. If $A =
+  \dom(f),\ B = \cod(f)$ we write $f : A \to B$.
+  
+  Further, for every pair $f : A \to B$ and $g : B \to C$ of arrows,
+  there is a  ``composite'' arrow
+  \[ (g \circ f) : A \to C \in \cat{C}_1 \]
+  Composition ($\circ$) is associative:
+  \[ (g \circ f) \circ h = g \circ (f \circ h) \qquad (\forall g,f,h
+  \in \cat{C}_1) \]
+  
+  For every object $A \in \cat{C}_0$ there is an arrow $id_A: A \to A$
+  such that for any $f : A \to B$:
+  \[ id_B \circ f = f \quad\mathrm{and}\quad f \circ id_A = f \]
+\end{definition}
+
+\begin{example}
+  $\ccat{Set}$ is the category of sets and total functions.
+  \begin{category}
+    \catobj{$\ccat{Set}_0$ is the class of all sets}
+    \catarr{$\ccat{Set}_1$ is the class of total functions on sets}
+    \catcomp{$\circ$ is the (set) function composition}
+    \catid{identity (set) function}
+  \end{category}
+  Given a total function $f$, we have:
+  \[ \dom(f) = \dom(f) \]
+  (the domain in the ``category world'' is the same as the domain in
+  the ``function world'').
+\end{example}
+
+\begin{example}
+  Category $\ccat{1}$
+  \begin{category}
+    \catobj{$\ccat{1}_0 = \{ \star \}$}
+    \catarr{$\ccat{1}_1 = \{ id_\star \}$}
+    \catcomp{$id_\star \circ id_\star = id_\star$}
+    \catid{$id_\star$}
+  \end{category}
+\end{example}
+
+\begin{example}
+  Category $\ccat{2}_\to$
+  \begin{category}
+    \catobj{$\ccat{2}_0 = \{ \star_1, \star_2 \}$}
+    \catarr{$\ccat{2}_1 = \{ id_1, id_2, f : \star_1 \to \star_2 \}$}
+    \catcomp{follows from identity axiom}
+    \catid{$\{ id_1, id_2 \}$}
+  \end{category}
+\end{example}
+
+\section{Diagrams}
+We can represent categories (or properties thereof) by diagrams. For
+example:
+
+\begin{tikzcd}
+A \rar{f} \dar{g'} & B \dar{g} \\
+C \rar{f'}         & D
+\end{tikzcd}\\
+which states that $g \circ f = f' \circ g'$.
+
+\begin{example}
+  $\ccat{Grph}$ is the category of multi-digraphs\footnote{Graphs with
+    multiple, directed edges} and graph homomorphisms.
+
+  \begin{category}
+    \catobj{A graph $G$ is a pair of sets $G_0, G_1$ of nodes and arrows with a
+      pair of maps $s_G, t_G : G_1 \to G_0$.}
+    \catarr{A graph morphism $f : G \to H$ between graphs $G$ and $H$ is a
+      pair
+      \[ f_0 : G_0 \to H_0, \quad f_1 : G_1 \to H_1 \]
+    of (set) functions, such that}
+
+    \begin{tikzcd}
+      G_1 \rar{f_1} \dar{s_G} & H_1 \dar{s_H} & G_1 \rar{f_1} \dar{t_G} & H_1 \dar{t_H} \\
+      G_0 \rar{f_0}           & H_0           & G_0 \rar{f_0}           & H_0
+    \end{tikzcd}
+
+    \catcomp{Given two graph morphisms:
+      \[ f : G \to H = (f_0, f_1) \]
+      \[ g : H \to K = (g_0, f_1) \]
+      we define their composition:
+      \[ (g \circ f) = (g_0 \circ f_0 : G_0 \to K_0,\ g_1 \circ f_1 : G_1
+      \to K_1) \]
+    }
+    \catid{The identity graph morphism $id_G : G \to G$ is defined as
+      the pair $(id_0, id_1)$, where $id_0$ is the identity function
+      over nodes and $id_1$ is the identity function over arrows}
+  \end{category}
+
+  We have to show that the composition is still a graph morphism and
+  that it is associative. We have:
+
+  \begin{tikzcd}
+    G_1 \rar{f_1} \dar{s_G} & H_1 \dar{s_H} & H_1 \rar{g_1} \dar{s_H} & K_1 \dar{s_K} \\
+    G_0 \rar{f_0}           & H_0           & H_0 \rar{g_0}           & K_0
+  \end{tikzcd}
+
+  By pasting the two together, we can show that the condition on source
+  maps holds.
+
+  \begin{tikzcd}
+    G_1 \rar{f_1} \dar{s_G} & H_1 \dar{s_H} \rar{g_1} & K_1 \dar{s_K} \\
+    G_0 \rar{f_0}           & H_0           \rar{g_0}  & K_0
+  \end{tikzcd}
+
+  Equivalent proof for target maps. This proves that a composed graph
+  morphism is a graph morphism.
+
+  We show $id_H \circ f = f$ using graphs:
+
+  \begin{tikzcd}
+    G_1 \rar{f_1} \dar{s_G} & H_1 \dar{s_H} \rar[equal]{id_{H_1}} & H_1 \dar{s_H} \\
+    G_0 \rar{f_0}           & H_0           \rar[equal]{id_{H_1}} & H_0
+  \end{tikzcd}
+
+  We omit proofs of associativity.
+\end{example}
+
+\section{Products}
+
+\begin{example}
+  Given sets $S, T$ the cartesian product $S \times T$ is the set
+  \[ S \times T = \{ (s, t) | s \in S, t \in T \} \]
+\end{example}
+
+We generalize this notion to products in categories.
+
+\begin{definition}[Product]
+  Given two objects $A, B$ in a category $\cat{C}$, \textbf{a} product is:
+  \begin{itemize}
+  \item an object $C \in \cat{C}_0$ (often denoted $A \times B$)
+  \item an arrow $proj_1 : C \to A \in \cat{C}_1$ (sometimes denoted $\pi_1$)
+  \item an arrow $proj_2 : C \to B \in \cat{C}_1$ (sometimes denoted $\pi_2$)
+  \end{itemize}
+  such that for any 
+  \[ D \in \cat{C}_0,\ q_1 : D \to A \in \cat{C}_1,\ q_2 : D \to B \in
+  \cat{C}_1 \]
+  there is a \emph{unique} $q : D \to C$ such that
+  \[ \pi_1 \circ q = p_1 \ \mathrm{and} \ \pi_2 \circ q = p_2 \]
+  We can express this with the following commuting diagram:
+
+  \begin{tikzcd}
+    \phantom{A} & D \ar{dl}{q_1}\dar{q}\ar{dr}{q_2} & \\
+    A & C \lar{\pi_1}\rar{\pi_2}          & B
+  \end{tikzcd}
+\end{definition}
+
+\begin{example}
+Is the cartesian product is a product in the category of sets? Yes!\\
+Given two sets $S,\ T$, the cartesian product $S \times T$ is a
+product:
+
+\begin{itemize}
+\item $S \times T$ is a set
+\item $\pi_1 : S \times T \to S \quad \pi_1((s, t)) = s$
+\item $\pi_2 : S \times T \to T \quad \pi_1((s, t)) = t$
+\end{itemize}
+
+For example:
+\begin{align*}
+A &= Int\\
+B &= String\\
+A \times B &= Int \times String\\
+D &= Boolean\\
+q_1 &= Boolean \to Int \textrm{ (C-encoding of boolean)}\\
+q_2 &= Boolean \to String \textrm{ (toString)}\\
+q &= Boolean \to Int \times String
+\end{align*}
+\end{example}
+
+\section{Isomorphisms}
+\begin{definition}[Isomorphism]
+An iso in a category $\cat{C}$,
+\[ f: A \to B \in \cat{C}_1 \]
+is an arrow such that there is an arrow
+\[ f^{-1} : B \to A \]
+such that 
+\[ f \circ f^{-1} = id_B \textrm{ and } f^{-1} \circ f = id_A. \]
+If there is an iso $f : A \to B$ we say $A$ and $B$ are isomorphic and
+we write $A \cong B$ or $f : A \stackrel{\sim}{\to} B$.
+\end{definition}
+
+\end{document}
+
+%%% Local Variables: 
+%%% mode: latex
+%%% TeX-master: t
+%%% End: 
